@@ -1,0 +1,18 @@
+{
+  "name"          : "backbone-relations",
+  "version"       : "0.1.0",
+  "description"   : "Convienient and fast backbone relations and attributes",
+  "keywords"      : ["Backbone", "relation", "nested", "model"],
+  "repository"    : "git@github.com:SamDuvall/backbone-relations.git",
+  "author"        : "Sam Duvall <https://github.com/SamDuvall>",
+
+  "dependencies"  : {
+    "underscore": ">=1.4.3",
+    "backbone":   ">=0.9.10"
+  },
+
+  "devDependencies": {
+    "expect.js": "0.2.x",
+    "mocha": "1.6.0"
+  }
+}

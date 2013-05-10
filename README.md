@@ -1,7 +1,7 @@
-backbone-relations
+backbone-relationships
 ==================
 
-backbone-relations provides a way to specify 1:1 and 1:N relationships between Backbone models and collections.  It combines the speed and low memory footprint of [Backbone Associations](https://github.com/dhruvaray/backbone-associations) with the versatility of [Backbone Relational](https://github.com/PaulUithol/Backbone-relational)...and more!
+backbone-relationships provides a way to specify 1:1 and 1:N relationships between Backbone models and collections.  It combines the speed and low memory footprint of [Backbone Associations](https://github.com/dhruvaray/backbone-associations) with the versatility of [Backbone Relational](https://github.com/PaulUithol/Backbone-relational)...and more!
 
 # Codecs
 Codecs provide a way to decode and encode attributes going back and forth to the server.  Each codec must provide a toJson on the object and a fromJson on the prototype.
@@ -26,7 +26,7 @@ Calling toJSON will return the date back to a string
     example.toJSON().created_at == '2012-12-17T13:30:59-08:00Z'; // Returns true
 
 # Relations
-Here are the key benefits of relations in backbone-relations over the other libraries.
+Here are the key benefits of relations in backbone-relationships over the other libraries.
 
 - Allows reverse relationships (i.e. belongs to) - Backbone Associations
 - Does not keep global collections, which either leads to memory bloat or memory management - Backbone Relational

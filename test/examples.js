@@ -1,4 +1,4 @@
-var Backbone = require('../backbone-relations.js');
+var Backbone = require('../backbone-relationships.js');
 
 global.Team = Backbone.Model.extend({
   fields: [

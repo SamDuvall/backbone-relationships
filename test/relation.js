@@ -1,6 +1,6 @@
 require('./examples');
 var expect = require('expect.js'),
-    Backbone = require('../backbone-relations.js');
+    Backbone = require('../backbone-relationships.js');
 
 describe('Backbone.Relation', function() {
   describe('HasOne', function() {

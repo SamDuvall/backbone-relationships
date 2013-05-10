@@ -1,9 +1,9 @@
 {
-  "name"          : "backbone-relations",
+  "name"          : "backbone-relationships",
   "version"       : "0.1.0",
-  "description"   : "Convienient and fast backbone relations and attributes",
+  "description"   : "Convienient and fast backbone relationships and attributes",
   "keywords"      : ["Backbone", "relation", "nested", "model"],
-  "repository"    : "git@github.com:SamDuvall/backbone-relations.git",
+  "repository"    : "git@github.com:SamDuvall/backbone-relationships.git",
   "author"        : "Sam Duvall <https://github.com/SamDuvall>",
 
   "dependencies"  : {

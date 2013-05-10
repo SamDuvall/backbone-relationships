@@ -7,8 +7,8 @@
   "author"        : "Sam Duvall <https://github.com/SamDuvall>",
 
   "dependencies"  : {
-    "underscore": ">=1.4.3",
-    "backbone":   ">=0.9.10"
+    "underscore": ">=1.4.4",
+    "backbone":   ">=1.0.0"
   },
 
   "devDependencies": {

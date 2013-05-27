@@ -358,4 +358,78 @@
     return child;
   };
 
+
+  var array = [];
+  var slice = array.slice;
+
+  // Underscore methods that we want to implement on the Collection.
+  var methods = ['forEach', 'each', 'map', 'collect', 'reduce', 'foldl',
+    'inject', 'reduceRight', 'foldr', 'find', 'detect', 'filter', 'select',
+    'reject', 'every', 'all', 'some', 'any', 'include', 'contains', 'invoke',
+    'max', 'min', 'sortedIndex', 'toArray', 'size', 'first', 'head', 'take',
+    'initial', 'rest', 'tail', 'last', 'without', 'indexOf', 'shuffle',
+    'lastIndexOf', 'isEmpty'];
+
+  // Mix in each Underscore method as a proxy to `Collection#models`.
+  var applyMethods = function(prototype) {
+    _.each(methods, function(method) {
+      prototype[method] = function() {
+        var args = slice.call(arguments);
+        args.unshift(this.models);
+        return _[method].apply(_, args);
+      };
+    });
+  }
+
+  // Set of a collection based on a simple filter
+
+  Backbone.Collection.Subset = function(collection, filter) {
+    var me = this;
+    this.collection = collection;
+    this.filter = filter;
+
+    this.collection.on('reset', function() {
+      this.reset();
+      this.trigger('reset', this.models);
+    }, this);
+
+    this.collection.on('add', function(model) {
+      if (filter(model)) {
+        this.reset();
+        this.trigger('add', model);
+      }
+    }, this);
+
+    this.collection.on('remove', function(model) {
+      if (filter(model)) {
+        this.reset();
+        this.trigger('remove', model);
+      }
+    }, this);
+    
+    this.reset();
+  }
+
+  _.extend(Backbone.Collection.Subset.prototype, Backbone.Events, {
+    reset: function() {
+      this.models = _.filter(this.collection.models, function(model) {
+        return this.filter(model);
+      }, this);
+      this.length = this.models.length;
+    },
+
+    setFilter: function(filter) {
+      this.filter = filter;
+      this.reset();
+    }
+  });
+
+  applyMethods(Backbone.Collection.Subset.prototype);
+
+  _.extend(Backbone.Collection.prototype, {
+    subset: function(filter) {
+      return new Backbone.Collection.Subset(this, filter);
+    }
+  });
+
 }).call(this);

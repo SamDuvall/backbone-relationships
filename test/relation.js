@@ -96,7 +96,7 @@ describe('Backbone.Relation', function() {
       });
     });
 
-    describe('events', function() {
+    describe('changes', function() {
       var team;
       var count;
 
@@ -116,11 +116,38 @@ describe('Backbone.Relation', function() {
         count = 0 ;
       });
 
-      it('should trigger a change', function() {
+      it('should log changed', function() {
+        team.coach.set({name: 'Samuel'});
+        expect(team.changed.coach).to.eql({
+          name: 'Samuel'
+        });
+      });
+
+      it('should trigger an event', function() {
         team.on('change', increaseCount);
         team.on('change:coach', increaseCount);
         team.coach.set({name: 'Scuba Steven'})        
         expect(count).to.be(2);
+      });
+    });
+
+    describe('clone', function() {
+      var team;
+
+      beforeEach(function() {
+        team = new Team({
+          id: 1,
+          name: 'Rocket Whale',
+          coach: {
+            name: 'Scuba Steve'
+          }
+        });
+      });
+
+      it('should clone', function() {
+        var clone = team.clone();
+        clone.coach.set({name: 'Samuel'});
+        expect(team.coach.get('name') == 'Sam');
       });
     });
   });
@@ -226,7 +253,7 @@ describe('Backbone.Relation', function() {
       });
     });
 
-    describe('events', function() {
+    describe('changes', function() {
       var team;
       var count;
 
@@ -248,11 +275,42 @@ describe('Backbone.Relation', function() {
         count = 0 ;
       });
 
-      it('should trigger a change', function() {
+      it('should log changed', function() {
+        team.players.first().set({name: 'Samuel'});
+        expect(team.changed.players).to.eql([{
+          name: 'Samuel'
+        },{
+          name: 'Tom'
+        }]);
+      });
+
+      it('should trigger an event', function() {
         team.on('change', increaseCount);
         team.on('change:players', increaseCount);
         team.players.first().set({name: 'Samuel'})        
         expect(count).to.be(2);
+      });
+    });
+
+    describe('clone', function() {
+      var team;
+
+      beforeEach(function() {
+        team = new Team({
+          id: 1,
+          name: 'Rocket Whale',
+          players: [{
+            name: 'Sam'
+          },{
+            name: 'Tom'
+          }]
+        });
+      });
+
+      it('should clone', function() {
+        var clone = team.clone();
+        clone.players.first().set({name: 'Samuel'});
+        expect(team.players.first().get('name') == 'Sam');
       });
     });
   });

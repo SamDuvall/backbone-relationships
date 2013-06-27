@@ -35,7 +35,7 @@
   _.extend(Backbone.Codec.prototype, {
     decode: function(value) {
       var attributes = {};
-      attributes[this.key] = value.toJSON();
+      attributes[this.key] = value != undefined ? value.toJSON() : value;
       return attributes;
     }
   });
@@ -164,6 +164,8 @@
 
       // Bubble up events
       value.on('change', function(value, options) {
+        model.changed = {};
+        model.changed[this.key] = value.toJSON({reverseRelations : false});
         model.trigger('change', options);
         model.trigger('change:' + this.key, value, options);
       }, this);
@@ -231,6 +233,8 @@
       // Bubble up events
       collection.on('add remove change', function(model, options) {
         _.each(collection.belongsTo, function(owner) {
+          owner.changed = {};
+          owner.changed[this.key] = collection.toJSON({reverseRelations : false});
           owner.trigger('change', options);
           owner.trigger('change:' + this.key, collection, options);
         }, this);
@@ -340,6 +344,16 @@
       });
       
       return decodedAttributes;
+    },
+
+    clone: function() {
+      var clone = OldBackbone.Model.prototype.clone.call(this);
+
+      if (this.relations) _.each(_.keys(this.relations), function(key) {
+        if (this[key]) clone[key] = this[key].toJSON();
+      }, this);
+
+      return clone;
     }
   });
 

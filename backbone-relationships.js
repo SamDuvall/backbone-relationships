@@ -122,6 +122,7 @@
         get: function() {
           if(this.belongsTo) return this.belongsTo[reverseKey];
         },
+
         set: function(owner) {
           // Break recursion
           var currentOwner = this[reverseKey];
@@ -135,7 +136,7 @@
           delete this.belongsTo[reverseKey];
 
           // Set new owner
-          if(owner) {
+          if (owner) {
             if(!(owner instanceof Backbone.Model)) owner = new model(owner);
             this.belongsTo[reverseKey] = owner;
             owner[key] = this;
@@ -150,10 +151,23 @@
       return null;
     },
 
-    set: function(model,value) {
-      if(!value) return;
-      if(!(value instanceof this.relatedModel)) value = new this.relatedModel(value);
+    set: function(model, value) {
+      // Break recursion
+      if (value && model === value[this.reverseKey]) return value;
+
+      // Format the value to be a model
+      if (!value) return;
+      if (!(value instanceof this.relatedModel)) value = new this.relatedModel(value);
+
+      // Link back to the owner
       value[this.reverseKey] = model;
+
+      // Bubble up events
+      value.on('change', function(value, options) {
+        model.trigger('change', options);
+        model.trigger('change:' + this.key, value, options);
+      }, this);
+
       return value;
     }
   });
@@ -213,6 +227,14 @@
       // Tell the collection it belongs to us
       collection.belongsTo = collection.belongsTo || {};
       collection.belongsTo[this.reverseKey] = model;
+
+      // Bubble up events
+      collection.on('add remove change', function(model, options) {
+        _.each(collection.belongsTo, function(owner) {
+          owner.trigger('change', options);
+          owner.trigger('change:' + this.key, collection, options);
+        }, this);
+      }, this);
 
       return collection;
     },

@@ -95,6 +95,34 @@ describe('Backbone.Relation', function() {
         expect(newTeam.coach).to.be(coach);
       });
     });
+
+    describe('events', function() {
+      var team;
+      var count;
+
+      function increaseCount() {
+        count = count + 1;
+      }
+
+      beforeEach(function() {
+        team = new Team({
+          id: 1,
+          name: 'Rocket Whale',
+          coach: {
+            name: 'Scuba Steve'
+          }
+        });
+
+        count = 0 ;
+      });
+
+      it('should trigger a change', function() {
+        team.on('change', increaseCount);
+        team.on('change:coach', increaseCount);
+        team.coach.set({name: 'Scuba Steven'})        
+        expect(count).to.be(2);
+      });
+    });
   });
 
   describe('HasMany', function() {
@@ -195,6 +223,36 @@ describe('Backbone.Relation', function() {
         expect(player.team).to.be(newTeam);
         expect(originalTeam.players.length).to.be(0);
         expect(newTeam.players.length).to.be(1);
+      });
+    });
+
+    describe('events', function() {
+      var team;
+      var count;
+
+      function increaseCount() {
+        count = count + 1;
+      }
+
+      beforeEach(function() {
+        team = new Team({
+          id: 1,
+          name: 'Rocket Whale',
+          players: [{
+            name: 'Sam'
+          },{
+            name: 'Tom'
+          }]
+        });
+
+        count = 0 ;
+      });
+
+      it('should trigger a change', function() {
+        team.on('change', increaseCount);
+        team.on('change:players', increaseCount);
+        team.players.first().set({name: 'Samuel'})        
+        expect(count).to.be(2);
       });
     });
   });

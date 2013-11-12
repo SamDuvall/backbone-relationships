@@ -201,11 +201,29 @@
 
   Backbone.Model = Backbone.Model.extend({
     addField: function(key, field) {
+      this.fields = this.fields || {};
+      this.fields[key] = field;
+
       Object.defineProperty(this, key, {
-        configurable: true,
         enumerable: true,
         get: function() {
           return this.attributes[key];
+        },
+        set: function(value) {
+          this.set(key, value);
+        }
+      });
+    },
+
+    addEmbedded: function(key, field) {
+      this.embedded = this.embedded || {};
+      this.embedded[key] = field;
+
+      var cacheKey = '_' + key;
+      Object.defineProperty(this, key, {
+        enumerable: true,
+        get: function() {
+          return this[cacheKey];
         },
         set: function(value) {
           this.set(key, value);
@@ -229,10 +247,16 @@
       var encodedAttributes = _.clone(attributes);
 
       // SCHEMA
-      _.each(this.schema, function (field, key) {
+      _.each(this.fields, function (field, key) {
         var value = attributes[key];
         if (field.type) var fromJSON = field.type.fromJSON;
         if (value && fromJSON) encodedAttributes[key] = fromJSON(value);
+      },this);
+
+      // EMBEDDED
+      _.each(this.embedded, function (field, key) {
+        var value = attributes[key];
+        this['_' + key] = new field(value);
       },this);
 
       // RELATIONS
@@ -297,7 +321,8 @@
 
     // Setup schema
     _.each(schema, function(field, key) {
-      child.prototype.addField(key, field);
+      if (_.isFunction(field)) child.prototype.addEmbedded(key, field);
+      else child.prototype.addField(key, field);
     });
 
     // Setup relations

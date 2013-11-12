@@ -26,4 +26,63 @@ describe('Backbone.Model', function() {
       });
     });
   });
+
+  describe('embedded', function() {
+    describe('model', function() {
+      var team;
+
+      beforeEach(function() {
+        team = new Team({
+          logo: {
+            url: '/images/image.gif'
+          }
+        }, {
+          parse: true
+        });
+      });
+
+      it('should encode', function() {
+        expect(team.logo.url).to.be('/images/image.gif');
+        expect(team.logo.getUrl()).to.be('/images/image.gif');
+      });
+
+      it('should decode', function() {
+        var json = team.toJSON();
+        expect(json).to.eql({
+          logo: {
+            url: '/images/image.gif'
+          }
+        });
+      });
+    });
+
+    describe('collection', function() {
+      var team;
+
+      beforeEach(function() {
+        team = new Team({
+          images: [{
+            url: '/images/image.gif'
+          }]
+        }, {
+          parse: true
+        });
+      });
+
+      it('should encode', function() {
+        expect(team.images.length).to.be(1);
+        expect(team.images.models[0].url).to.be('/images/image.gif');
+        expect(team.images.models[0].getUrl()).to.be('/images/image.gif');
+      });
+
+      it('should decode', function() {
+        var json = team.toJSON();
+        expect(json).to.eql({
+          images: [{
+            url: '/images/image.gif'
+          }]
+        });
+      });
+    });    
+  });
 });

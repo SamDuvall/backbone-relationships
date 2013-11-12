@@ -211,16 +211,12 @@
 
   Backbone.Model = Backbone.Model.extend({
     constructor: function(attributes, options) {
-      options || (options = {});
       OldBackbone.Model.apply( this, arguments );
 
-      if (options.parent) {
-        this.parent = options.parent;
-        this.on('change', function(model) {
-          var changes = this.changedAttributes();
-          this.triggerMutation('change', model, changes);
-        }, this)
-      }
+      this.on('change', function(model) {
+        var changes = this.changedAttributes();
+        this.triggerMutation('change', model, changes);
+      }, this)
     },
 
     triggerUp: triggerUp,
@@ -285,9 +281,10 @@
       // EMBEDDED
       _.each(this.embedded, function (field, key) {
         var value = attributes[key];
-        if (value) encodedAttributes[key] = new field(value, {
-          parent: this
-        });
+        if (value) {
+          var embedded = encodedAttributes[key] = new field(value);
+          embedded._parent = this;
+        }
       },this);
 
       // RELATIONS
@@ -370,26 +367,52 @@
     return child;
   };
 
+  Object.defineProperty(Backbone.Model.prototype, 'parent', {
+    enumerable: true,
+    get: function() {
+      if (this.collection) return this.collection.parent;
+      return this._parent;
+    }
+  });
+
+  Object.defineProperty(Backbone.Model.prototype, 'root', {
+    enumerable: true,
+    get: function() {
+      var parent = this.parent;
+      return parent ? parent.root : this;
+    }
+  });
+
   Backbone.Collection = Backbone.Collection.extend({
     constructor: function(attributes, options) {
-      options || (options = {});
       OldBackbone.Collection.call( this, attributes, options );
 
-      if (options.parent) {
-        this.parent = options.parent;
-        
-        this.on('add', function(model) {
-          this.triggerMutation('add', model, this);
-        }, this);
+      this.on('add', function(model) {
+        this.triggerMutation('add', model, this);
+      }, this);
 
-        this.on('remove', function(model) {
-          this.triggerMutation('remove', model, this);
-        }, this);
-      }
+      this.on('remove', function(model) {
+        this.triggerMutation('remove', model, this);
+      }, this);
     },
 
     triggerUp: triggerUp,
     triggerMutation: triggerMutation
+  });
+
+  Object.defineProperty(Backbone.Collection.prototype, 'parent', {
+    enumerable: true,
+    get: function() {
+      return this._parent;
+    }
+  });
+
+  Object.defineProperty(Backbone.Collection.prototype, 'root', {
+    enumerable: true,
+    get: function() {
+      var parent = this.parent;
+      return parent ? parent.root : this;
+    }
   });
 
 }).call(this);

@@ -41,6 +41,14 @@ describe('Backbone.Model', function() {
         });
       });
 
+      it('should get its parent', function() {
+        expect(team.logo.parent).to.be(team);
+      });
+
+      it('should get its root', function() {
+        expect(team.logo.root).to.be(team);
+      });
+
       it('should encode', function() {
         expect(team.logo.url).to.be('/images/image.gif');
         expect(team.logo.getUrl()).to.be('/images/image.gif');
@@ -67,6 +75,16 @@ describe('Backbone.Model', function() {
         }, {
           parse: true
         });
+      });
+
+      it('should get its parent', function() {
+        expect(team.images.parent).to.be(team);
+        expect(team.images.first().parent).to.be(team);
+      });
+
+      it('should get its root', function() {
+        expect(team.images.root).to.be(team);
+        expect(team.images.first().root).to.be(team);
       });
 
       it('should encode', function() {

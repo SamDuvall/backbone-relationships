@@ -90,42 +90,28 @@
 
       if(_.isString(this.relatedModel)) this.relatedModel = eval(this.relatedModel);
 
-      // REVERSE RELATION
       var model = this.model;
       var key = this.key;
       var reverseKey = this.reverseKey;
+      var reverseCacheKey = '_' + reverseKey;
 
-      // Add to prototype
+      // Add reverse key
       var relatedPrototype = this.relatedModel.prototype;
-      relatedPrototype.reverseRelations = relatedPrototype.reverseRelations || {};
-      relatedPrototype.reverseRelations[reverseKey] = this;
+      var reverseKeys = relatedPrototype.reverseKeys = relatedPrototype.reverseKeys || [];
+      if (!_.contains(reverseKeys, reverseKey)) {
+        reverseKeys.push(reverseKey);
 
-      // Access via the reverse key (e.g. coach.team = team)
-      Object.defineProperty(this.relatedModel.prototype, reverseKey, {
-        enumerable: true,
-        get: function() {
-          if(this.belongsTo) return this.belongsTo[reverseKey];
-        },
-        set: function(owner) {
-          // Break recursion
-          var currentOwner = this[reverseKey];
-          if(currentOwner === owner) return;
-
-          // Initialize belongs to
-          this.belongsTo = this.belongsTo || {};
-
-          // Remove from existing owner
-          if(currentOwner) currentOwner[key] = null;
-          delete this.belongsTo[reverseKey];
-
-          // Set new owner
-          if(owner) {
-            if(!(owner instanceof Backbone.Model)) owner = new model(owner);
-            this.belongsTo[reverseKey] = owner;
-            owner[key] = this;
+        Object.defineProperty(this.relatedModel.prototype, reverseKey, {
+          enumerable: true,
+          get: function() {
+            return this[reverseCacheKey];
+          },
+          set: function(value) {
+            if(!(value instanceof Backbone.Model)) value = new model(value);
+            this[reverseCacheKey] = value;
           }
-        }
-      });
+        });
+      }
 
       this._initialized = true;
     },
@@ -157,30 +143,29 @@
       if(_.isString(this.relatedModel)) this.relatedModel = eval(this.relatedModel);
       if(_.isString(this.collectionType)) this.collectionType = eval(this.collectionType);
      
-      // REVERSE RELATION
       var model = this.model;
       var key = this.key;
       var reverseKey = this.reverseKey;
+      var reverseCacheKey = '_' + reverseKey;
 
-      // Add to prototype
+      // Add reverse key
       var relatedPrototype = this.relatedModel.prototype;
-      relatedPrototype.reverseRelations = relatedPrototype.reverseRelations || {};
-      relatedPrototype.reverseRelations[reverseKey] = this;
+      var reverseKeys = relatedPrototype.reverseKeys = relatedPrototype.reverseKeys || [];
+      if (!_.contains(reverseKeys, reverseKey)) {
+        reverseKeys.push(reverseKey);
 
-      // Access via the reverse key (e.g. player.team)
-      Object.defineProperty(this.relatedModel.prototype, reverseKey, {
-        enumerable: true,
-        get: function() {
-          if(this.collection && this.collection.belongsTo) return this.collection.belongsTo[reverseKey];
-        },
-        set: function(owner) {
-          // Remove from existing owner
-          if(this.collection) this.collection.remove(this);
-          // Add to new owner
-          if(!(owner instanceof Backbone.Model)) owner = new model(owner);
-          owner[key].add(this);
-        }
-      });
+        Object.defineProperty(this.relatedModel.prototype, reverseKey, {
+          enumerable: true,
+          get: function() {
+            if (this[reverseCacheKey]) return this[reverseCacheKey];
+            if (this.collection) return this.collection[reverseKey];
+          },
+          set: function(value) {
+            if(!(value instanceof Backbone.Model)) value = new model(value);
+            this[reverseCacheKey] = value;
+          }
+        });
+      }
 
       this._initialized = true;
     },
@@ -195,8 +180,7 @@
       }
 
       // Tell the collection it belongs to us
-      collection.belongsTo = collection.belongsTo || {};
-      collection.belongsTo[this.reverseKey] = model;
+      collection[this.reverseKey] = model;
 
       return collection;
     },
@@ -233,7 +217,7 @@
       // Default the options
       options = _.extend({},{
         relations: true,
-        reverseRelations: true
+        reverse: true
       },options);
 
       var json = OldBackbone.Model.prototype.toJSON.apply(this, arguments);
@@ -262,7 +246,7 @@
       },this);
 
       // Reverse
-      _.each(this.reverseRelations,function(relation,reverseKey) {
+      _.each(this.reverseKeys,function(reverseKey) {
         var value = encodedAttributes[reverseKey];
         delete encodedAttributes[reverseKey];
         if(value) this[reverseKey] = value;
@@ -275,8 +259,8 @@
       options = options || {};
       var decodedAttributes = _.clone(attributes);
 
-      // REVERSE RELATIONS
-      if(options.reverseRelations) _.each(this.reverseRelations,function(relation,key) {
+      // REVERSE
+      if(options.reverse) _.each(this.reverseKeys,function(key) {
         var model = this[key];
         if(model && model.id) decodedAttributes[key + "_id"] = model.id;
       },this);
@@ -284,7 +268,7 @@
       // RELATIONS
       if(options.relations) _.each(this.relations,function(relation) {
         var value = this[relation.cacheKey]; // Use the cache key to avoid creating objects unnecessrily
-        if(relation.keyDestination && value) decodedAttributes[relation.keyDestination] = value.toJSON({reverseRelations: false});
+        if(relation.keyDestination && value) decodedAttributes[relation.keyDestination] = value.toJSON({reverse: false});
       },this);
 
       // SCHEMA

@@ -13,6 +13,12 @@ global.Team = Backbone.Model.extend({
     reverseKey: 'team',
     relatedModel: 'Coach'
   },{
+    type: Backbone.Relation.HasOne,
+    key: 'assistant',
+    keyDestination: 'assistant_attributes',
+    reverseKey: 'team',
+    relatedModel: 'Coach'
+  },{
     type: Backbone.Relation.HasMany,
     key: 'players',
     keyDestination: 'player_attributes',

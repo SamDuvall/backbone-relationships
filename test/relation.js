@@ -36,6 +36,9 @@ describe('Backbone.Relation', function() {
           name: 'Rocket Whale',
           coach: {
             name: 'Scuba Steve'
+          },
+          assistant: {
+            name: 'Taco Tom'
           }
         }, {
           parse: true
@@ -44,6 +47,7 @@ describe('Backbone.Relation', function() {
 
       it('should encode', function() {
         expect(team.coach).to.be.a(Backbone.Model);
+        expect(team.assistant).to.be.a(Backbone.Model);
       });
 
       it('should decode', function() {
@@ -53,6 +57,9 @@ describe('Backbone.Relation', function() {
           name: 'Rocket Whale',
           coach_attributes: {
             name: 'Scuba Steve'
+          },
+          assistant_attributes: {
+            name: 'Taco Tom'
           }
         });
 
@@ -60,6 +67,12 @@ describe('Backbone.Relation', function() {
         expect(coachJson).to.eql({
           team_id: 1,
           name: 'Scuba Steve'
+        });
+
+        var assistantJson = team.assistant.toJSON();
+        expect(assistantJson).to.eql({
+          team_id: 1,
+          name: 'Taco Tom'
         });
       });
     });
@@ -97,8 +110,6 @@ describe('Backbone.Relation', function() {
         coach.team = newTeam;
 
         expect(coach.team).to.be(newTeam);
-        expect(originalTeam.coach).to.be(null);
-        expect(newTeam.coach).to.be(coach);
       });
     });
   });
@@ -186,7 +197,6 @@ describe('Backbone.Relation', function() {
       it('should encode', function() {
         var team = player.team;
         expect(team).to.be.a(Backbone.Model);
-        expect(team.players.length).to.be(1);
       });
 
       it('should decode', function() {
@@ -203,9 +213,7 @@ describe('Backbone.Relation', function() {
         player.team = newTeam;
 
         expect(player.team).to.be(newTeam);
-        expect(originalTeam.players.length).to.be(0);
-        expect(newTeam.players.length).to.be(1);
-      });
+      });      
     });
   });
 });

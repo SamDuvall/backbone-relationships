@@ -83,6 +83,43 @@ describe('Backbone.Model', function() {
           }]
         });
       });
+
+      it('should track adds', function() {
+        team.images.add({
+          url: '/images/image.jpg'
+        });
+
+        var json = team.toJSON();
+        expect(json).to.eql({
+          images: [{
+            url: '/images/image.gif'
+          }, {
+            url: '/images/image.jpg'
+          }]
+        });
+      });
+
+      it('should track removes', function() {
+        var image = team.images.models[0];
+        team.images.remove(image);
+
+        var json = team.toJSON();
+        expect(json).to.eql({
+          images: []
+        });
+      });
+
+      it('should track changes', function() {
+        var image = team.images.models[0];
+        image.url = '/images/image.tiff'
+
+        var json = team.toJSON();
+        expect(json).to.eql({
+          images: [{
+            url: '/images/image.tiff'
+          }]
+        });
+      });
     });    
   });
 });

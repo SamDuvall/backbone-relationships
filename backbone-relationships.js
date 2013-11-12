@@ -210,7 +210,9 @@
           return this.attributes[key];
         },
         set: function(value) {
-          this.set(key, value);
+          this.set(key, value, {
+            parse: true
+          });
         }
       });
     },
@@ -219,14 +221,15 @@
       this.embedded = this.embedded || {};
       this.embedded[key] = field;
 
-      var cacheKey = '_' + key;
       Object.defineProperty(this, key, {
         enumerable: true,
         get: function() {
-          return this[cacheKey];
+          return this.attributes[key];
         },
         set: function(value) {
-          this.set(key, value);
+          this.set(key, value, {
+            parse: true
+          });
         }
       });
     },
@@ -256,7 +259,7 @@
       // EMBEDDED
       _.each(this.embedded, function (field, key) {
         var value = attributes[key];
-        this['_' + key] = new field(value);
+        if (value) encodedAttributes[key] = new field(value);
       },this);
 
       // RELATIONS
@@ -295,12 +298,18 @@
         if(relation.keyDestination && value) decodedAttributes[relation.keyDestination] = value.toJSON({reverse: false});
       },this);
 
-      // SCHEMA
-      _.keys(this.schema).forEach(function(key) {
+      // FIELDS
+      if (this.fields) _.keys(this.fields).forEach(function(key) {
         var value = attributes[key];
         if (value && value.toJSON) decodedAttributes[key] = value.toJSON();
       });
       
+      // EMBEDDED
+      if (this.embedded) _.keys(this.embedded).forEach(function(key) {
+        var value = attributes[key];
+        if (value) decodedAttributes[key] = value.toJSON();
+      });
+
       return decodedAttributes;
     }
   },{

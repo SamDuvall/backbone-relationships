@@ -197,9 +197,34 @@
     }
   });
 
+  function triggerUp() { // Trigger all the way up the chain
+    this.trigger.apply(this, arguments);
+    if (this.parent) this.parent.triggerUp.apply(this.parent, arguments);
+  };
+
+  function triggerMutation(type) {
+    this.triggerUp.apply(this, ['mutate'].concat(_.last(arguments, arguments.length)));
+    this.triggerUp.apply(this, ['mutate:' + type].concat(_.last(arguments, arguments.length - 1)));   
+  };
+
   // MODEL
 
   Backbone.Model = Backbone.Model.extend({
+    constructor: function(attributes, options) {
+      options || (options = {});
+      OldBackbone.Model.apply( this, arguments );
+
+      if (options.parent) {
+        this.parent = options.parent;
+        // this.on('change', function(model) {
+        //   this.triggerMutation('change', model, this);
+        // }, this)
+      }
+    },
+
+    triggerUp: triggerUp,
+    triggerMutation: triggerMutation,
+
     addField: function(key, field) {
       this.fields = this.fields || {};
       this.fields[key] = field;
@@ -259,7 +284,9 @@
       // EMBEDDED
       _.each(this.embedded, function (field, key) {
         var value = attributes[key];
-        if (value) encodedAttributes[key] = new field(value);
+        if (value) encodedAttributes[key] = new field(value, {
+          parent: this
+        });
       },this);
 
       // RELATIONS
@@ -341,5 +368,27 @@
 
     return child;
   };
+
+  Backbone.Collection = Backbone.Collection.extend({
+    constructor: function(attributes, options) {
+      options || (options = {});
+      OldBackbone.Collection.call( this, attributes, options );
+
+      if (options.parent) {
+        this.parent = options.parent;
+        
+        this.on('add', function(model) {
+          this.triggerMutation('add', model, this);
+        }, this);
+
+        this.on('remove', function(model) {
+          this.triggerMutation('remove', model, this);
+        }, this);
+      }
+    },
+
+    triggerUp: triggerUp,
+    triggerMutation: triggerMutation
+  });
 
 }).call(this);

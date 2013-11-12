@@ -84,28 +84,56 @@ describe('Backbone.Model', function() {
         });
       });
 
-      it('should track adds', function() {
-        team.images.add({
-          url: '/images/image.jpg'
+      describe('add', function() {
+        it('should decode', function() {
+          team.images.add({
+            url: '/images/image.jpg'
+          });
+
+          var json = team.toJSON();
+          expect(json).to.eql({
+            images: [{
+              url: '/images/image.gif'
+            }, {
+              url: '/images/image.jpg'
+            }]
+          });
         });
 
-        var json = team.toJSON();
-        expect(json).to.eql({
-          images: [{
-            url: '/images/image.gif'
-          }, {
+        it('should fire a mutate event', function(done) {
+          team.on('mutate:add', function(model, collection) {
+            expect(model).to.be(team.images.last());
+            expect(collection).to.be(team.images);
+            done();
+          });
+
+          team.images.add({
             url: '/images/image.jpg'
-          }]
+          });
         });
       });
 
-      it('should track removes', function() {
-        var image = team.images.models[0];
-        team.images.remove(image);
+      describe('remove', function() {
+        it('should decode', function() {
+          var image = team.images.models[0];
+          team.images.remove(image);
 
-        var json = team.toJSON();
-        expect(json).to.eql({
-          images: []
+          var json = team.toJSON();
+          expect(json).to.eql({
+            images: []
+          });
+        });
+
+        it('should fire a mutate event', function(done) {
+          var image = team.images.models[0];
+
+          team.on('mutate:remove', function(model, collection) {
+            expect(model).to.be(image);
+            expect(collection).to.be(team.images);
+            done();
+          });
+
+          team.images.remove(image);
         });
       });
 

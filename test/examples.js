@@ -3,11 +3,15 @@ var Backbone = require('../backbone-relationships.js');
 global.Image = Backbone.Model.extend({
   schema: {
     created_at: { type: Date },
-    url: { type: String }
+    ref: { type: String }
   },
 
-  getUrl: function() {
-    return this.url;  
+  urlRoot: function() {
+    return this.parent.url() + '/images';
+  },
+
+  getPath: function() {
+    return this.ref;  
   }
 });
 
@@ -16,6 +20,8 @@ global.Image.Collection = Backbone.Collection.extend({
 });
 
 global.Team = Backbone.Model.extend({
+  urlRoot: '/teams',
+
   schema: {
     name: { type: String },
     created_at: { type: Date },
@@ -45,6 +51,8 @@ global.Team = Backbone.Model.extend({
 });
 
 global.Coach = Backbone.Model.extend({
+  urlRoot: '/coaches',
+
   schema: {
     name: { type: String },
     created_at: { type: Date }
@@ -52,6 +60,8 @@ global.Coach = Backbone.Model.extend({
 });
 
 global.Player = Backbone.Model.extend({
+  urlRoot: '/players',
+
   schema: {
     name: { type: String },
     created_at: { type: Date }

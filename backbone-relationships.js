@@ -207,11 +207,24 @@
     this.triggerUp.apply(this, ['mutate:' + type].concat(_.last(arguments, arguments.length - 1)));   
   };
 
+  function embeddedUrl(model, key) {
+    return model.url() + '/' + key.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+  }
+
   // MODEL
 
   Backbone.Model = Backbone.Model.extend({
     constructor: function(attributes, options) {
+      options || (options = {});
       OldBackbone.Model.apply( this, arguments );
+
+      var embedded = options.embedded;
+      if (embedded) {
+        this._parent = embedded.parent;
+        this.urlRoot = function() {
+          return embeddedUrl(this.parent, embedded.key);
+        }
+      }
 
       this.on('change', function(model) {
         var changes = this.changedAttributes();
@@ -281,10 +294,12 @@
       // EMBEDDED
       _.each(this.embedded, function (field, key) {
         var value = attributes[key];
-        if (value) {
-          var embedded = encodedAttributes[key] = new field(value);
-          embedded._parent = this;
-        }
+        if (value) encodedAttributes[key] = new field(value, {
+          embedded: {
+            parent: this,
+            key: key
+          }
+        });
       },this);
 
       // RELATIONS
@@ -389,7 +404,16 @@
 
   Backbone.Collection = Backbone.Collection.extend({
     constructor: function(attributes, options) {
+      options || (options = {});
       OldBackbone.Collection.call( this, attributes, options );
+
+      var embedded = options.embedded;
+      if (embedded) {
+        this._parent = embedded.parent;
+        this.url = function() {
+          return embeddedUrl(this.parent, embedded.key);
+        }
+      }
 
       this.on('add', function(model) {
         this.triggerMutation('add', model, this);

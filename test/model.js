@@ -3,7 +3,7 @@ var expect = require('expect.js'),
     Backbone = require('../backbone-relationships.js');
 
 describe('Backbone.Model', function() {
-  describe('codec', function(){
+  describe('schema', function(){
     describe('dates', function(){
       var team;
 
@@ -33,8 +33,9 @@ describe('Backbone.Model', function() {
 
       beforeEach(function() {
         team = new Team({
+          id: 1,
           logo: {
-            url: '/images/image.gif'
+            ref: '/images/image.gif'
           }
         }, {
           parse: true
@@ -49,16 +50,21 @@ describe('Backbone.Model', function() {
         expect(team.logo.root).to.be(team);
       });
 
+      it('should have a URL', function() {
+        expect(team.logo.url()).to.be('/teams/1/logo');
+      });
+
       it('should encode', function() {
-        expect(team.logo.url).to.be('/images/image.gif');
-        expect(team.logo.getUrl()).to.be('/images/image.gif');
+        expect(team.logo.ref).to.be('/images/image.gif');
+        expect(team.logo.getPath()).to.be('/images/image.gif');
       });
 
       it('should decode', function() {
         var json = team.toJSON();
         expect(json).to.eql({
+          id: 1,
           logo: {
-            url: '/images/image.gif'
+            ref: '/images/image.gif'
           }
         });
       });
@@ -70,7 +76,7 @@ describe('Backbone.Model', function() {
       beforeEach(function() {
         team = new Team({
           images: [{
-            url: '/images/image.gif'
+            ref: '/images/image.gif'
           }]
         }, {
           parse: true
@@ -89,15 +95,15 @@ describe('Backbone.Model', function() {
 
       it('should encode', function() {
         expect(team.images.length).to.be(1);
-        expect(team.images.models[0].url).to.be('/images/image.gif');
-        expect(team.images.models[0].getUrl()).to.be('/images/image.gif');
+        expect(team.images.models[0].ref).to.be('/images/image.gif');
+        expect(team.images.models[0].getPath()).to.be('/images/image.gif');
       });
 
       it('should decode', function() {
         var json = team.toJSON();
         expect(json).to.eql({
           images: [{
-            url: '/images/image.gif'
+            ref: '/images/image.gif'
           }]
         });
       });
@@ -105,15 +111,15 @@ describe('Backbone.Model', function() {
       describe('add', function() {
         it('should decode', function() {
           team.images.add({
-            url: '/images/image.jpg'
+            ref: '/images/image.jpg'
           });
 
           var json = team.toJSON();
           expect(json).to.eql({
             images: [{
-              url: '/images/image.gif'
+              ref: '/images/image.gif'
             }, {
-              url: '/images/image.jpg'
+              ref: '/images/image.jpg'
             }]
           });
         });
@@ -132,7 +138,7 @@ describe('Backbone.Model', function() {
           });
 
           team.images.add({
-            url: '/images/image.jpg'
+            ref: '/images/image.jpg'
           });
         });
       });
@@ -170,12 +176,12 @@ describe('Backbone.Model', function() {
       describe('change', function() {
         it('should decode', function() {
           var image = team.images.models[0];
-          image.url = '/images/image.tiff'
+          image.ref = '/images/image.tiff'
 
           var json = team.toJSON();
           expect(json).to.eql({
             images: [{
-              url: '/images/image.tiff'
+              ref: '/images/image.tiff'
             }]
           });
         });
@@ -186,7 +192,7 @@ describe('Backbone.Model', function() {
           team.on('mutate:change', function(model, changes) {
             expect(model).to.be(image);
             expect(changes).to.eql({
-              url: '/images/image.tiff'
+              ref: '/images/image.tiff'
             });
           });
 
@@ -194,12 +200,12 @@ describe('Backbone.Model', function() {
             expect(type).to.be('change');
             expect(model).to.be(image);
             expect(changes).to.eql({
-              url: '/images/image.tiff'
+              ref: '/images/image.tiff'
             });
             done();
           });
 
-          image.url = '/images/image.tiff'
+          image.ref = '/images/image.tiff'
         });
       });
 
@@ -207,9 +213,9 @@ describe('Backbone.Model', function() {
         beforeEach(function() {
           team = new Team({
             images: [{
-              url: '/images/image-1.gif'
+              ref: '/images/image-1.gif'
             }, {
-              url: '/images/image-2.gif'
+              ref: '/images/image-2.gif'
             }]
           }, {
             parse: true
@@ -223,9 +229,9 @@ describe('Backbone.Model', function() {
           var json = team.toJSON();
           expect(json).to.eql({
             images: [{
-              url: '/images/image-2.gif'
+              ref: '/images/image-2.gif'
             }, {
-              url: '/images/image-1.gif'
+              ref: '/images/image-1.gif'
             }]
           });
         });

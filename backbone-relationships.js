@@ -336,6 +336,10 @@
       });
 
       return decodedAttributes;
+    },
+
+    move: function(index) {
+      this.collection.move(this, index);
     }
   },{
     addRelation: function(relation) {
@@ -394,10 +398,23 @@
       this.on('remove', function(model) {
         this.triggerMutation('remove', model, this);
       }, this);
+
+      this.on('move', function(model, newIndex) {
+        this.triggerMutation('move', model, newIndex, this);
+      }, this);
     },
 
     triggerUp: triggerUp,
-    triggerMutation: triggerMutation
+    triggerMutation: triggerMutation,
+
+    move: function(model, newIndex) {
+      var oldIndex = this.indexOf(model);
+
+      this.models.splice(oldIndex, 1);
+      this.models.splice(newIndex, 0, model);
+
+      this.trigger('move', model, newIndex, this);
+    }
   });
 
   Object.defineProperty(Backbone.Collection.prototype, 'parent', {

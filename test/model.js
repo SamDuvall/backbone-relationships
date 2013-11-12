@@ -202,6 +202,54 @@ describe('Backbone.Model', function() {
           image.url = '/images/image.tiff'
         });
       });
-    });    
+
+      describe('move', function() {
+        beforeEach(function() {
+          team = new Team({
+            images: [{
+              url: '/images/image-1.gif'
+            }, {
+              url: '/images/image-2.gif'
+            }]
+          }, {
+            parse: true
+          });
+        });
+
+        it('should decode', function() {
+          var image = team.images.first();
+          image.move(1);
+
+          var json = team.toJSON();
+          expect(json).to.eql({
+            images: [{
+              url: '/images/image-2.gif'
+            }, {
+              url: '/images/image-1.gif'
+            }]
+          });
+        });
+
+        it('should fire events', function(done) {
+          var image = team.images.first();
+
+          team.on('mutate:move', function(model, index, collection) {
+            expect(model).to.be(image);
+            expect(index).to.be(1);
+            expect(collection).to.be(team.images);
+          });
+
+          team.on('mutate', function(type, model, index, collection) {
+            expect(type).to.be('move');
+            expect(model).to.be(image);
+            expect(index).to.be(1);
+            expect(collection).to.be(team.images);
+            done();
+          });
+
+          image.move(1);
+        });
+      });
+    });
   });
 });

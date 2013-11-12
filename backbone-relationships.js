@@ -216,9 +216,10 @@
 
       if (options.parent) {
         this.parent = options.parent;
-        // this.on('change', function(model) {
-        //   this.triggerMutation('change', model, this);
-        // }, this)
+        this.on('change', function(model) {
+          var changes = this.changedAttributes();
+          this.triggerMutation('change', model, changes);
+        }, this)
       }
     },
 

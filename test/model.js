@@ -104,6 +104,12 @@ describe('Backbone.Model', function() {
           team.on('mutate:add', function(model, collection) {
             expect(model).to.be(team.images.last());
             expect(collection).to.be(team.images);
+          });
+
+          team.on('mutate', function(type, model, collection) {
+            expect(type).to.be('add');
+            expect(model).to.be(team.images.last());
+            expect(collection).to.be(team.images);
             done();
           });
 
@@ -130,6 +136,12 @@ describe('Backbone.Model', function() {
           team.on('mutate:remove', function(model, collection) {
             expect(model).to.be(image);
             expect(collection).to.be(team.images);
+          });
+
+          team.on('mutate', function(type, model, collection) {
+            expect(type).to.be('remove');
+            expect(model).to.be(image);
+            expect(collection).to.be(team.images);
             done();
           });
 
@@ -137,15 +149,39 @@ describe('Backbone.Model', function() {
         });
       });
 
-      it('should track changes', function() {
-        var image = team.images.models[0];
-        image.url = '/images/image.tiff'
+      describe('change', function() {
+        it('should decode', function() {
+          var image = team.images.models[0];
+          image.url = '/images/image.tiff'
 
-        var json = team.toJSON();
-        expect(json).to.eql({
-          images: [{
-            url: '/images/image.tiff'
-          }]
+          var json = team.toJSON();
+          expect(json).to.eql({
+            images: [{
+              url: '/images/image.tiff'
+            }]
+          });
+        });
+
+        it('should fire a mutate event', function(done) {
+          var image = team.images.models[0];
+
+          team.on('mutate:change', function(model, changes) {
+            expect(model).to.be(image);
+            expect(changes).to.eql({
+              url: '/images/image.tiff'
+            });
+          });
+
+          team.on('mutate', function(type, model, changes) {
+            expect(type).to.be('change');
+            expect(model).to.be(image);
+            expect(changes).to.eql({
+              url: '/images/image.tiff'
+            });
+            done();
+          });
+
+          image.url = '/images/image.tiff'
         });
       });
     });    

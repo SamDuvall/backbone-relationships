@@ -19,26 +19,10 @@
 
   // Out of the box conversions
 
-  if(!Date.fromJSON) Date.fromJSON = function(value) {
+  if (!Date.fromJSON) Date.fromJSON = function(value) {
     if (_.isDate(value)) return value;
     if (_.isString(value)) return new Date(value.replace('T', ' ').substr(0, 19));
   };
-
-  // CODECS
-
-  Backbone.Codec = function(field) {
-    this.key = field.name;
-    this.fields = [this.key];
-    this.encode = field.codec.fromJSON;
-  };
-
-  _.extend(Backbone.Codec.prototype, {
-    decode: function(value) {
-      var attributes = {};
-      attributes[this.key] = value.toJSON();
-      return attributes;
-    }
-  });
 
   // RELATIONS
 
@@ -232,22 +216,17 @@
   // MODEL
 
   Backbone.Model = Backbone.Model.extend({
-    set: function(key, value, options) {
-      var me = this;
-      var attributes;
-
-      if (_.isObject(key) || key == null) {
-        attributes = key;
-        options = value;
-
-      } else {
-        attributes = {};
-        attributes[key] = value;
-      }
-
-      attributes = this.encodeAttributes(attributes);
-
-      return OldBackbone.Model.prototype.set.call(this, attributes, options);
+    addField: function(key, field) {
+      Object.defineProperty(this, key, {
+        configurable: true,
+        enumerable: true,
+        get: function() {
+          return this.attributes[key];
+        },
+        set: function(value) {
+          this.set(key, value);
+        }
+      });
     },
 
     toJSON: function(options) {
@@ -262,16 +241,14 @@
       return json;
     },
 
-    encodeAttributes: function(attributes) {
+    parse: function(attributes) {
       var encodedAttributes = _.clone(attributes);
 
-      // CODECS
-      _.each(this.codecs, function (codec,key) {
-        codec.fields.forEach(function (field) {
-          delete encodedAttributes[field];
-        });
-        var values = _.values(_.pick(attributes, codec.fields));
-        if (values.length == codec.fields.length) encodedAttributes[key] = codec.encode.apply(codec, values);
+      // SCHEMA
+      _.each(this.schema, function (field, key) {
+        var value = attributes[key];
+        if (field.type) var fromJSON = field.type.fromJSON;
+        if (value && fromJSON) encodedAttributes[key] = fromJSON(value);
       },this);
 
       // RELATIONS
@@ -310,32 +287,15 @@
         if(relation.keyDestination && value) decodedAttributes[relation.keyDestination] = value.toJSON({reverseRelations: false});
       },this);
 
-      // CODECS
-      var codecs = _.pick(this.codecs, _.keys(attributes));
-      _.each(codecs, function (codec,key) {
-        delete decodedAttributes[key];
-        _.extend(decodedAttributes, codec.decode(attributes[key]));
+      // SCHEMA
+      _.keys(this.schema).forEach(function(key) {
+        var value = attributes[key];
+        if (value && value.toJSON) decodedAttributes[key] = value.toJSON();
       });
       
       return decodedAttributes;
     }
-  });
-
-  Object.defineProperty(Backbone.Model.prototype, 'codecs', {
-    enumerable: true,
-    get: function() {
-      if(this._codecs) return this._codecs;
-
-      var codecs = this._codecs = {};
-      _.select(this.fields,function(field) {
-        if(field.codec && !(field.codec instanceof Backbone.Codec)) field.codec = new Backbone.Codec(field);
-        if(field.codec) codecs[field.name] = field.codec;
-      });
-      return codecs;
-    }
-  });
-
-  _.extend(Backbone.Model,{
+  },{
     addRelation: function(relation) {
       var relation = new Backbone.Relation.build(relation);
       relation.register(this);
@@ -345,10 +305,16 @@
   // Add relations put on the prototype
   Backbone.Model.extend = function( protoProps, classProps ) {
     // Pull off any relations
+    var schema = protoProps.schema;
     var relations = protoProps.relations;
     protoProps = _.omit(protoProps,'relations');
 
     var child = OldBackbone.Model.extend.apply( this, arguments );
+
+    // Setup schema
+    _.each(schema, function(field, key) {
+      child.prototype.addField(key, field);
+    });
 
     // Setup relations
     _.each(relations,function(relation) {

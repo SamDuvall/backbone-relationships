@@ -1,10 +1,10 @@
 var Backbone = require('../backbone-relationships.js');
 
 global.Team = Backbone.Model.extend({
-  fields: [
-    {name: 'name'},
-    {name: 'created_at', codec: Date}
-  ],
+  schema: {
+    name: { type: String },
+    created_at: { type: Date }
+  },
   
   relations: [{
     type: Backbone.Relation.HasOne,
@@ -22,15 +22,15 @@ global.Team = Backbone.Model.extend({
 });
 
 global.Coach = Backbone.Model.extend({
-  fields: [
-    {name: 'name'},
-    {name: 'created_at', codec: Date}
-  ]
+  schema: {
+    name: { type: String },
+    created_at: { type: Date }
+  }
 });
 
 global.Player = Backbone.Model.extend({
-  fields: [
-    {name: 'name'},
-    {name: 'created_at', codec: Date}
-  ]
+  schema: {
+    name: { type: String },
+    created_at: { type: Date }
+  }
 });

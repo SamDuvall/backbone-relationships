@@ -10,6 +10,8 @@ describe('Backbone.Relation', function() {
       beforeEach(function() {
         team = new Team({
           name: 'Rocket Whale'
+        }, {
+          parse: true
         });
       });
 
@@ -35,6 +37,8 @@ describe('Backbone.Relation', function() {
           coach: {
             name: 'Scuba Steve'
           }
+        }, {
+          parse: true
         });
       });
 
@@ -70,6 +74,8 @@ describe('Backbone.Relation', function() {
             id: 1,
             name: 'Rocket Whale'
           }
+        }, {
+          parse: true
         })
       });
 
@@ -132,6 +138,8 @@ describe('Backbone.Relation', function() {
           },{
             name: 'Tom'
           }]
+        }, {
+          parse: true
         });
       });
 
@@ -170,6 +178,8 @@ describe('Backbone.Relation', function() {
             id: 1,
             name: 'Rocket Whale'
           }
+        }, {
+          parse: true          
         })
       });
 

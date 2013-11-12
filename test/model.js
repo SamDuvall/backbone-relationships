@@ -10,12 +10,14 @@ describe('Backbone.Model', function() {
       beforeEach(function() {
         team = new Team({
           created_at: '2012-12-17T13:30:59-08:00'
+        }, {
+          parse: true
         });
       });
 
       it('should encode', function(){
-        expect(team.get('created_at')).to.be.a(Date);
-        expect(team.get('created_at')).to.eql(new Date(2012, 11, 17, 13, 30, 59));
+        expect(team.created_at).to.be.a(Date);
+        expect(team.created_at).to.eql(new Date(2012, 11, 17, 13, 30, 59));
       });
 
       it('should decode', function(){

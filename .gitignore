@@ -1,1 +1,5 @@
+# Node modules
 node_modules
+
+# Ignore Mac files
+*.DS_Store

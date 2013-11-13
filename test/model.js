@@ -1,6 +1,6 @@
 require('./examples');
-var expect = require('expect.js'),
-    Backbone = require('../backbone-relationships.js');
+var expect = require('expect.js');
+var Backbone = require('../backbone-relationships.js');
 
 describe('Backbone.Model', function() {
   describe('schema', function(){
@@ -26,6 +26,31 @@ describe('Backbone.Model', function() {
   });
 
   describe('embedded', function() {
+    describe('set', function() {
+      var team;
+
+      beforeEach(function() {
+        team = new Team({
+          id: 1
+        });
+      });
+
+      it('should set from raw', function() {
+        team.logo = {
+          ref: '/images/image.gif'
+        }
+        expect(team.logo.ref).to.be('/images/image.gif');
+      });
+
+      it('should set from object', function() {
+        var logo = new Image({
+          ref: '/images/image.gif'
+        });
+        team.logo = logo;
+        expect(team.logo.ref).to.be('/images/image.gif');
+      });
+    });
+
     describe('model', function() {
       var team;
 

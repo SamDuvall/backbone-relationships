@@ -10,8 +10,6 @@ describe('Backbone.Model', function() {
       beforeEach(function() {
         team = new Team({
           created_at: '2012-12-17T13:30:59-08:00'
-        }, {
-          parse: true
         });
       });
 
@@ -37,8 +35,6 @@ describe('Backbone.Model', function() {
           logo: {
             ref: '/images/image.gif'
           }
-        }, {
-          parse: true
         });
       });
 
@@ -78,8 +74,6 @@ describe('Backbone.Model', function() {
           images: [{
             ref: '/images/image.gif'
           }]
-        }, {
-          parse: true
         });
       });
 
@@ -217,8 +211,6 @@ describe('Backbone.Model', function() {
             }, {
               ref: '/images/image-2.gif'
             }]
-          }, {
-            parse: true
           });
         });
 

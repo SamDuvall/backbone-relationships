@@ -40,6 +40,7 @@ describe('Backbone.Model', function() {
           ref: '/images/image.gif'
         }
         expect(team.logo.ref).to.be('/images/image.gif');
+        expect(team.logo.attributes.ref).to.be('/images/image.gif');
       });
 
       it('should set from object', function() {
@@ -48,6 +49,7 @@ describe('Backbone.Model', function() {
         });
         team.logo = logo;
         expect(team.logo.ref).to.be('/images/image.gif');
+        expect(team.logo.attributes.ref).to.be('/images/image.gif');
       });
     });
 

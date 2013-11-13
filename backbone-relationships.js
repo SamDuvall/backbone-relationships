@@ -3,19 +3,10 @@
   /**
    * CommonJS shim
    **/
-  var _, OldBackbone, Backbone, exports;
-  if ( typeof window === 'undefined' ) {
-    _ = require( 'underscore' );
-    OldBackbone = require( 'backbone' );
-    Backbone = _.clone(OldBackbone);
-    exports = module.exports = Backbone;
-  }
-  else {
-    _ = window._;
-    OldBackbone = window.Backbone;
-    Backbone = window.Backbone = _.clone(OldBackbone);
-    exports = window;
-  }
+  var _ = require( 'underscore' );
+  var OldBackbone = require( 'backbone' );
+  var Backbone = _.clone(OldBackbone);
+  exports = module.exports = Backbone;
 
   // Out of the box conversions
 
@@ -107,7 +98,9 @@
             return this[reverseCacheKey];
           },
           set: function(value) {
-            if(!(value instanceof Backbone.Model)) value = new model(value);
+            if(!(value instanceof Backbone.Model)) value = new model(value, {
+              parse: true
+            });
             this[reverseCacheKey] = value;
           }
         });
@@ -122,8 +115,13 @@
 
     set: function(model,value) {
       if(!value) return;
-      if(!(value instanceof this.relatedModel)) value = new this.relatedModel(value);
-      value[this.reverseKey] = model;
+      if(!(value instanceof this.relatedModel)) value = new this.relatedModel(value, {
+        parse: true,
+        reverse: {
+          key: this.reverseKey,
+          model: model
+        }
+      });
       return value;
     }
   });
@@ -161,7 +159,9 @@
             if (this.collection) return this.collection[reverseKey];
           },
           set: function(value) {
-            if(!(value instanceof Backbone.Model)) value = new model(value);
+            if(!(value instanceof Backbone.Model)) value = new model(value, {
+              parse: true
+            });
             this[reverseCacheKey] = value;
           }
         });
@@ -190,7 +190,9 @@
         var collection = value;
       } else {
         var collection = model[this.key]
-        collection.reset(value);
+        collection.reset(value, {
+          parse: true
+        });
       }
 
       return collection;
@@ -216,7 +218,6 @@
   Backbone.Model = Backbone.Model.extend({
     constructor: function(attributes, options) {
       options || (options = {});
-      OldBackbone.Model.apply( this, arguments );
 
       var embedded = options.embedded;
       if (embedded) {
@@ -226,9 +227,19 @@
         }
       }
 
+      var reverse = options.reverse;
+      if (reverse) {
+        this[reverse.key] = reverse.model;
+      }
+
+      OldBackbone.Model.apply( this, arguments );
+
       this.on('change', function(model) {
-        var changes = this.changedAttributes();
-        this.triggerMutation('change', model, changes);
+        var previous = this.previousAttributes();
+        if (_.keys(previous).length) {
+          var changes = this.changedAttributes();
+          this.triggerMutation('change', model, changes);
+        }
       }, this)
     },
 
@@ -288,13 +299,14 @@
       _.each(this.fields, function (field, key) {
         var value = attributes[key];
         if (field.type) var fromJSON = field.type.fromJSON;
-        if (value && fromJSON) encodedAttributes[key] = fromJSON(value);
+        if (value && fromJSON) encodedAttributes[key] = fromJSON(value, this);
       },this);
 
       // EMBEDDED
       _.each(this.embedded, function (field, key) {
         var value = attributes[key];
         if (value) encodedAttributes[key] = new field(value, {
+          parse: true,
           embedded: {
             parent: this,
             key: key
@@ -332,22 +344,22 @@
         if(model && model.id) decodedAttributes[key + "_id"] = model.id;
       },this);
 
-      // RELATIONS
+      // FORWARD
       if(options.relations) _.each(this.relations,function(relation) {
         var value = this[relation.cacheKey]; // Use the cache key to avoid creating objects unnecessrily
         if(relation.keyDestination && value) decodedAttributes[relation.keyDestination] = value.toJSON({reverse: false});
       },this);
-
-      // FIELDS
-      if (this.fields) _.keys(this.fields).forEach(function(key) {
-        var value = attributes[key];
-        if (value && value.toJSON) decodedAttributes[key] = value.toJSON();
-      });
       
       // EMBEDDED
       if (this.embedded) _.keys(this.embedded).forEach(function(key) {
         var value = attributes[key];
         if (value) decodedAttributes[key] = value.toJSON();
+      });
+
+      // FIELDS
+      if (this.fields) _.keys(this.fields).forEach(function(key) {
+        var value = attributes[key];
+        if (value && value.toJSON) decodedAttributes[key] = value.toJSON();
       });
 
       return decodedAttributes;
@@ -405,7 +417,6 @@
   Backbone.Collection = Backbone.Collection.extend({
     constructor: function(attributes, options) {
       options || (options = {});
-      OldBackbone.Collection.call( this, attributes, options );
 
       var embedded = options.embedded;
       if (embedded) {
@@ -414,6 +425,8 @@
           return embeddedUrl(this.parent, embedded.key);
         }
       }
+
+      OldBackbone.Collection.call( this, attributes, options );
 
       this.on('add', function(model) {
         this.triggerMutation('add', model, this);

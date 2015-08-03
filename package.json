@@ -1,24 +1,29 @@
 {
-  "name"          : "backbone-relationships",
-  "version"       : "0.2.2",
-  "license"       : "MIT",
-  "description"   : "Convienient and fast backbone relationships and attributes",
-  "keywords"      : ["Backbone", "relation", "nested", "model"],
-  "repository"    : "https://github.com/samduvall/backbone-relationships",
-  "author"        : "Sam Duvall <https://github.com/SamDuvall>",
-  "main"          : "backbone-relationships.js",
-
-  "dependencies"  : {
-    "underscore": ">=1.5.0",
-    "backbone":   ">=1.1.0"
+  "name": "backbone-relationships",
+  "version": "0.3.0",
+  "license": "MIT",
+  "description": "Convienient and fast backbone relationships and attributes",
+  "keywords": [
+    "Backbone",
+    "relation",
+    "nested",
+    "model"
+  ],
+  "repository": "https://github.com/samduvall/backbone-relationships",
+  "author": "Sam Duvall <https://github.com/SamDuvall>",
+  "main": "index.js",
+  "dependencies": {
+    "backbone": ">=1.1.0",
+    "underscore": ">=1.5.0"
   },
-
   "devDependencies": {
     "expect.js": "0.2.x",
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-rimraf": "^0.1.1",
     "mocha": "1.6.0"
   },
-
-  "scripts":{
-      "test": "mocha"
+  "scripts": {
+    "test": "mocha"
   }
 }

@@ -1,4 +1,5 @@
-var Backbone = require('../backbone-relationships.js');
+var Backbone = require('../backbone-relationships');
+console.log(Backbone);
 
 global.Image = Backbone.Model.extend({
   schema: {
@@ -11,7 +12,7 @@ global.Image = Backbone.Model.extend({
   },
 
   getPath: function() {
-    return this.ref;  
+    return this.ref;
   }
 });
 
@@ -28,7 +29,7 @@ global.Team = Backbone.Model.extend({
     logo: Image,
     images: Image.Collection
   },
-  
+
   relations: [{
     type: Backbone.Relation.HasOne,
     key: 'coach',

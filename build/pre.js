@@ -6,6 +6,6 @@
 
   // Finally, as a browser global.
   } else
-    factory(_, Backbone);
+    Backbone = factory(_, Backbone);
 
 }(function (_, Backbone) {

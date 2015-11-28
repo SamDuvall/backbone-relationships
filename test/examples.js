@@ -1,5 +1,4 @@
 var Backbone = require('../backbone-relationships');
-console.log(Backbone);
 
 global.Image = Backbone.Model.extend({
   schema: {

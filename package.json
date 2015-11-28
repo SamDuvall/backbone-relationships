@@ -11,7 +11,7 @@
   ],
   "repository": "https://github.com/samduvall/backbone-relationships",
   "author": "Sam Duvall <https://github.com/SamDuvall>",
-  "main": "index.js",
+  "main": "backbone-relationships.js",
   "dependencies": {
     "backbone": ">=1.1.0",
     "underscore": ">=1.5.0"

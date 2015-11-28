@@ -11,9 +11,9 @@ Codecs provide a way to decode and encode attributes going back and forth to the
  A common use case for this to to convert a date from the server to a Date on the client and vice versa going back to the server.
 
     var ExampleModel = Backbone.Model.extend({
-      fields: [
-         {name: 'created_at', codec: Date}
-      ]
+      fields: {
+         created_at: {type: Date}
+      }
     });
 
 The following statement will return a Date object
@@ -53,17 +53,17 @@ Below is an example of a model with a 1:1 (HasOne) relation and 1:N (HasMany) re
     });
 
     var Coach = Backbone.Model.extend({
-      fields: [
-        {name: 'name'},
-        {name: 'created_at', codec: Date}
-      ]
+      fields: {
+        name: {type: String},
+        created_at: {type: Date}
+      }
     });
-    
+
     var Player = Backbone.Model.extend({
-      fields: [
-        {name: 'name'},
-        {name: 'created_at', codec: Date}
-      ]
+      fields: {
+        name: {type: String},
+        created_at: {type: Date}
+      }
     });
 
 The following object...
